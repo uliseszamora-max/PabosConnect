@@ -153,7 +153,7 @@
 
         const { error } = await supabase
           .from('posts')
-          .insert([{ usuario: currentUser, mensaje: mensaje, imagen: imagenBase64, fecha: fecha }]);
+          .insert([{ usuario: currentUser, mensaje: mensaje, imagen: imagenBase64, fecha: fecha, likes: 0 }]);
 
         if (error) {
           console.error("Error al guardar:", error);
@@ -183,7 +183,12 @@
             ? new Date(post.fecha).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
             : 'Sin fecha';
 
-          div.innerHTML = `<strong>${post.usuario}</strong><p>${post.mensaje}</p><small>${fechaFormateada}</small>`;
+          div.innerHTML = `
+            <strong>${post.usuario}</strong>
+            <p>${post.mensaje}</p>
+            <small>${fechaFormateada}</small>
+            <button onclick="darLike(${post.id})">👍 Me gusta (${post.likes ?? 0})</button>
+          `;
           if (post.imagen) {
             const img = document.createElement('img');
             img.src = post.imagen;
@@ -193,6 +198,32 @@
         });
       }
     });
+
+    async function darLike(postId) {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('likes')
+        .eq('id', postId)
+        .single();
+
+      if (error || !data) {
+        console.error("Error al obtener likes:", error);
+        return;
+      }
+
+      const nuevosLikes = (data.likes ?? 0) + 1;
+
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({ likes: nuevosLikes })
+        .eq('id', postId);
+
+      if (updateError) {
+        console.error("Error al actualizar likes:", updateError);
+      } else {
+        document.dispatchEvent(new Event('DOMContentLoaded')); // recarga la vista
+      }
+    }
   </script>
 </body>
 </html>

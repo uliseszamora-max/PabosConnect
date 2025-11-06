@@ -4,67 +4,34 @@
   <meta charset="UTF-8">
   <title>Prueba de Login</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4ff;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 50px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 1em;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #0077b6;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    #forum-section {
-      display: none;
-    }
+    body { font-family: sans-serif; background: #eef; padding: 40px; }
+    .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+    #forum-section { display: none; }
   </style>
 </head>
 <body>
 
   <div class="container" id="login-section">
-    <h2>Iniciar sesión</h2>
-    <input type="text" id="username" placeholder="Nombre de usuario">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Tu nombre">
     <button id="login-btn">Entrar</button>
   </div>
 
   <div class="container" id="forum-section">
     <h2>Bienvenido</h2>
-    <p>Ya puedes ver el contenido del foro.</p>
+    <p>Ya estás dentro del sitio.</p>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const loginBtn = document.getElementById('login-btn');
-      const usernameInput = document.getElementById('username');
-      const loginSection = document.getElementById('login-section');
-      const forumSection = document.getElementById('forum-section');
-
       loginBtn.addEventListener('click', () => {
-        const nombre = usernameInput.value.trim();
-
+        const nombre = document.getElementById('username').value.trim();
         if (nombre !== "") {
-          loginSection.style.display = 'none';
-          forumSection.style.display = 'block';
+          document.getElementById('login-section').style.display = 'none';
+          document.getElementById('forum-section').style.display = 'block';
         } else {
-          alert("Por favor, ingresa tu nombre de usuario.");
+          alert("Ingresa tu nombre.");
         }
       });
     });

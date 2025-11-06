@@ -2,17 +2,17 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>PabosConnect Café</title>
+  <title>PabosConnect</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #d7ccc8, #efebe9);
+      background: linear-gradient(to right, #e9f5e9, #f5f0e6);
       margin: 0;
       padding: 0;
     }
     header {
-      background: #4e342e;
-      color: #fbe9e7;
+      background: #2e7d32;
+      color: #fdf6e3;
       padding: 30px 20px;
       text-align: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
@@ -20,7 +20,7 @@
     .container {
       max-width: 700px;
       margin: 40px auto;
-      background: #fff8e1;
+      background: #fffbea;
       padding: 25px;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -32,12 +32,12 @@
       border: 1px solid #a1887f;
       border-radius: 8px;
       font-size: 1em;
-      background-color: #fbe9e7;
+      background-color: #f9f9f9;
     }
     button {
-      margin-top: 15px;
-      padding: 12px 25px;
-      background: #6d4c41;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #388e3c;
       color: white;
       border: none;
       border-radius: 8px;
@@ -45,10 +45,17 @@
       cursor: pointer;
     }
     button:hover {
-      background: #4e342e;
+      background: #1b5e20;
+    }
+    .logout-btn {
+      background: #8d6e63;
+      float: right;
+    }
+    .logout-btn:hover {
+      background: #5d4037;
     }
     .post {
-      border-top: 1px solid #bcaaa4;
+      border-top: 1px solid #d7ccc8;
       padding: 20px 0;
     }
     .post img {
@@ -57,38 +64,38 @@
       margin-top: 10px;
     }
     .post strong {
-      color: #6d4c41;
+      color: #2e7d32;
       font-size: 1.1em;
     }
     .post small {
       display: block;
       margin-top: 5px;
-      color: #5d4037;
+      color: #6d4c41;
       font-size: 0.9em;
-    }
-    #logout-btn {
-      float: right;
-      background: #8d6e63;
-      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>PabosConnect Café</h1>
-    <p>Un espacio cálido para compartir ideas e imágenes</p>
+    <h1>PabosConnect</h1>
+    <p>Tu espacio en tonos verdes y cafés para compartir ideas e imágenes</p>
   </header>
 
+  <!-- Sección de login -->
   <div class="container" id="login-section">
     <h2>Iniciar sesión</h2>
     <input type="text" id="username" placeholder="Nombre de usuario">
     <button id="login-btn">Entrar</button>
   </div>
 
+  <!-- Sección del foro -->
   <div class="container" id="forum-section" style="display:none;">
-    <button id="logout-btn">Cerrar sesión</button>
-    <h2>Crear publicación</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>Foro de PabosConnect</h2>
+      <button class="logout-btn" id="logout-btn">Cerrar sesión</button>
+    </div>
+
     <form id="form">
       <textarea id="mensaje" rows="3" placeholder="¿Qué estás pensando?" required></textarea>
       <input type="file" id="imagen" accept="image/*">
@@ -103,16 +110,17 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       let currentUser = "";
-      let publicaciones = [];
+      let publicaciones = JSON.parse(localStorage.getItem("publicaciones")) || [];
 
       const loginBtn = document.getElementById('login-btn');
       const usernameInput = document.getElementById('username');
       const loginSection = document.getElementById('login-section');
       const forumSection = document.getElementById('forum-section');
-      const logoutBtn = document.getElementById('logout-btn');
       const form = document.getElementById('form');
       const posts = document.getElementById('posts');
+      const logoutBtn = document.getElementById('logout-btn');
 
+      // LOGIN
       loginBtn.addEventListener('click', () => {
         currentUser = usernameInput.value.trim();
         if (currentUser !== "") {
@@ -124,14 +132,15 @@
         }
       });
 
+      // CERRAR SESIÓN
       logoutBtn.addEventListener('click', () => {
         currentUser = "";
+        usernameInput.value = "";
         forumSection.style.display = 'none';
         loginSection.style.display = 'block';
-        usernameInput.value = "";
-        posts.innerHTML = "";
       });
 
+      // CREAR PUBLICACIÓN
       form.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -157,21 +166,26 @@
           reader.onload = function(event) {
             nuevaPublicacion.imagen = event.target.result;
             publicaciones.unshift(nuevaPublicacion);
-            mostrarPosts();
-            leerPublicacion(nuevaPublicacion);
+            guardarYMostrar();
           };
           reader.readAsDataURL(imagen);
         } else {
           publicaciones.unshift(nuevaPublicacion);
-          mostrarPosts();
-          leerPublicacion(nuevaPublicacion);
+          guardarYMostrar();
         }
 
         form.reset();
       });
 
+      // GUARDAR EN LOCALSTORAGE Y MOSTRAR
+      function guardarYMostrar() {
+        localStorage.setItem("publicaciones", JSON.stringify(publicaciones));
+        mostrarPosts();
+      }
+
+      // MOSTRAR PUBLICACIONES
       function mostrarPosts() {
-        posts.innerHTML = `<h2>Publicaciones recientes (${publicaciones.length})</h2>`;
+        posts.innerHTML = <h2>Publicaciones recientes (${publicaciones.length})</h2>;
         publicaciones.forEach((post, index) => {
           const div = document.createElement('div');
           div.className = 'post';
@@ -181,27 +195,32 @@
             <p>${post.mensaje}</p>
             <small>${post.fecha}</small>
             <button onclick="darLike(${index})">👍 Me gusta (${post.likes})</button>
+            <button onclick="leerPost(${index})">🔊 Escuchar</button>
           `;
+
           if (post.imagen) {
             const img = document.createElement('img');
             img.src = post.imagen;
             div.appendChild(img);
           }
+
           posts.appendChild(div);
         });
       }
 
+      // DAR LIKE
       window.darLike = function(index) {
         publicaciones[index].likes++;
-        mostrarPosts();
+        guardarYMostrar();
       };
 
-      function leerPublicacion(post) {
-        const texto = `${post.usuario} publicó: ${post.mensaje}. Fecha: ${post.fecha}. Tiene ${post.likes} me gusta.`;
-        const voz = new SpeechSynthesisUtterance(texto);
-        voz.lang = 'es-MX';
-        speechSynthesis.speak(voz);
-      }
+      // LECTURA DE VOZ (accesibilidad visual)
+      window.leerPost = function(index) {
+        const post = publicaciones[index];
+        const speech = new SpeechSynthesisUtterance(${post.usuario} publicó: ${post.mensaje});
+        speech.lang = 'es-MX';
+        speechSynthesis.speak(speech);
+      };
     });
   </script>
 </body>

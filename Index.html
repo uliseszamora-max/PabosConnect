@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>PabosConnect</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -73,17 +72,17 @@
 
   <header>
     <h1>PabosConnect</h1>
-    <p>T
-    Tu sitio seguro para funar
-    </p>
+    <p>Tu espacio en tonos verdes y cafés para compartir ideas e imágenes</p>
   </header>
 
+  <!-- Sección de login -->
   <div class="container" id="login-section">
     <h2>Iniciar sesión</h2>
     <input type="text" id="username" placeholder="Nombre de usuario">
     <button id="login-btn">Entrar</button>
   </div>
 
+  <!-- Sección del foro -->
   <div class="container" id="forum-section" style="display:none;">
     <h2>Crear publicación</h2>
     <form id="form">
@@ -99,12 +98,8 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const supabase = supabase.createClient(
-        'https://pn0jdukyo4rjosjtehwr.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuYmp1ZGt5dWpvaXFzamhlaHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNzc1NTYsImV4cCI6MjA3Nzk1MzU1Nn0.uUyNaDpzEtSJPJ_utOdOQLMS9bNEg0MtGjQip0vHXx4' // ← pega aquí tu clave completa
-      );
-
       let currentUser = "";
+      let publicaciones = [];
 
       const loginBtn = document.getElementById('login-btn');
       const usernameInput = document.getElementById('username');
@@ -113,18 +108,20 @@
       const form = document.getElementById('form');
       const posts = document.getElementById('posts');
 
+      // LOGIN
       loginBtn.addEventListener('click', () => {
         currentUser = usernameInput.value.trim();
         if (currentUser !== "") {
           loginSection.style.display = 'none';
           forumSection.style.display = 'block';
-          cargarPosts();
+          mostrarPosts();
         } else {
           alert("Por favor, ingresa tu nombre de usuario.");
         }
       });
 
-      form.addEventListener('submit', async function(e) {
+      // CREAR PUBLICACIÓN
+      form.addEventListener('submit', function(e) {
         e.preventDefault();
 
         const mensaje = document.getElementById('mensaje').value;
@@ -136,62 +133,42 @@
           return;
         }
 
-        let imagenBase64 = null;
+        let nuevaPublicacion = {
+          usuario: currentUser,
+          mensaje: mensaje,
+          fecha: new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }),
+          likes: 0,
+          imagen: null
+        };
 
         if (imagen) {
           const reader = new FileReader();
-          reader.onload = async function(event) {
-            imagenBase64 = event.target.result;
-            await guardarPost(mensaje, imagenBase64);
+          reader.onload = function(event) {
+            nuevaPublicacion.imagen = event.target.result;
+            publicaciones.unshift(nuevaPublicacion);
+            mostrarPosts();
           };
           reader.readAsDataURL(imagen);
         } else {
-          await guardarPost(mensaje, null);
+          publicaciones.unshift(nuevaPublicacion);
+          mostrarPosts();
         }
 
         form.reset();
       });
 
-      async function guardarPost(mensaje, imagenBase64) {
-        const fecha = new Date().toISOString();
-
-        const { error } = await supabase
-          .from('posts')
-          .insert([{ usuario: currentUser, mensaje: mensaje, imagen: imagenBase64, fecha: fecha, likes: 0 }]);
-
-        if (error) {
-          console.error("Error al guardar:", error);
-          alert("Hubo un problema al publicar.");
-        } else {
-          cargarPosts();
-        }
-      }
-
-      async function cargarPosts() {
-        const { data, error } = await supabase
-          .from('posts')
-          .select('*')
-          .order('id', { ascending: false });
-
-        if (error) {
-          console.error("Error al cargar:", error);
-          return;
-        }
-
-        posts.innerHTML = `<h2>Publicaciones recientes (${data.length})</h2>`;
-        data.forEach(post => {
+      // MOSTRAR PUBLICACIONES
+      function mostrarPosts() {
+        posts.innerHTML = `<h2>Publicaciones recientes (${publicaciones.length})</h2>`;
+        publicaciones.forEach((post, index) => {
           const div = document.createElement('div');
           div.className = 'post';
-
-          const fechaFormateada = post.fecha
-            ? new Date(post.fecha).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
-            : 'Sin fecha';
 
           div.innerHTML = `
             <strong>${post.usuario}</strong>
             <p>${post.mensaje}</p>
-            <small>${fechaFormateada}</small>
-            <button onclick="darLike(${post.id})">👍 Me gusta (${post.likes ?? 0})</button>
+            <small>${post.fecha}</small>
+            <button onclick="darLike(${index})">👍 Me gusta (${post.likes})</button>
           `;
           if (post.imagen) {
             const img = document.createElement('img');
@@ -202,30 +179,10 @@
         });
       }
 
-      window.darLike = async function(postId) {
-        const { data, error } = await supabase
-          .from('posts')
-          .select('likes')
-          .eq('id', postId)
-          .single();
-
-        if (error || !data) {
-          console.error("Error al obtener likes:", error);
-          return;
-        }
-
-        const nuevosLikes = (data.likes ?? 0) + 1;
-
-        const { error: updateError } = await supabase
-          .from('posts')
-          .update({ likes: nuevosLikes })
-          .eq('id', postId);
-
-        if (updateError) {
-          console.error("Error al actualizar likes:", updateError);
-        } else {
-          cargarPosts();
-        }
+      // DAR LIKE
+      window.darLike = function(index) {
+        publicaciones[index].likes++;
+        mostrarPosts();
       };
     });
   </script>

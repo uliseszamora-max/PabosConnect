@@ -5,21 +5,30 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PABOSCONNECT — Foro académico (Prototipo)</title>
   <style>
-    :root{--bg:#f7fbf7;--card:#ffffff;--accent:#2f8f5a;--muted:#6b7280;--glass: rgba(255,255,255,0.7)}
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(180deg,#eef7ef 0%, #ffffff 100%);color:#0b1220}
+    :root{
+      --bg:#f7fbf7; --card:#ffffff; --accent:#2f8f5a; --muted:#6b7280; --glass: rgba(255,255,255,0.7);
+      --text:#0b1220;
+    }
+    /* dark theme variables */
+    .dark {
+      --bg:#0b1220; --card:#0f1720; --accent:#3fc37b; --muted:#9aa3ad; --glass: rgba(255,255,255,0.03);
+      --text:#e6eef3;
+    }
+
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(180deg,var(--bg) 0%, #ffffff 100%);color:var(--text)}
     .app{max-width:1100px;margin:28px auto;padding:18px}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:72px;height:72px;border-radius:10px;background:var(--glass);display:flex;align-items:center;justify-content:center;border:2px solid rgba(47,143,90,0.12)}
-    .logo img{width:56px;height:56px;object-fit:contain}
+    .logo{width:72px;height:72px;border-radius:10px;background:var(--glass);display:flex;align-items:center;justify-content:center;border:2px solid rgba(47,143,90,0.12);overflow:hidden}
+    .logo img{width:64px;height:64px;object-fit:contain;display:block}
     h1{margin:0;font-size:20px}
     p.lead{margin:0;color:var(--muted);font-size:13px}
 
     .top-actions{display:flex;gap:8px;align-items:center}
     .btn{background:var(--accent);color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
     .btn.ghost{background:transparent;color:var(--accent);border:2px solid var(--accent)}
-    .search{display:flex;align-items:center;gap:8px;background:white;padding:6px 8px;border-radius:999px;border:1px solid #e6efe6}
-    input.search-in{border:0;outline:0;padding:6px;min-width:220px}
+    .search{display:flex;align-items:center;gap:8px;background:var(--card);padding:6px 8px;border-radius:999px;border:1px solid rgba(0,0,0,0.04)}
+    input.search-in{border:0;outline:0;padding:6px;min-width:220px;background:transparent;color:var(--text)}
 
     main{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px}
 
@@ -36,6 +45,7 @@
     .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
     .threads{display:flex;flex-direction:column;gap:10px}
     .thread{display:flex;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);align-items:flex-start;background:linear-gradient(180deg,#fff,#fbfffb)}
+    .dark .thread{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.02))}
     .votes{width:56px;display:flex;flex-direction:column;align-items:center;padding:6px;border-radius:8px;background:#f6fff6;border:1px solid rgba(47,143,90,0.08)}
     .votes button{background:transparent;border:0;cursor:pointer;font-weight:700;color:var(--accent)}
     .thread-content{flex:1}
@@ -47,23 +57,30 @@
     footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
 
     /* modal */
-    .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:none;align-items:center;justify-content:center;padding:18px}
+    .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:60}
     .modal{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:16px}
     .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
-    textarea{min-height:100px;padding:8px;border-radius:8px;border:1px solid #e6efe6}
-    input[type=text],input[type=email],select{padding:8px;border-radius:8px;border:1px solid #e6efe6}
+    textarea{min-height:100px;padding:8px;border-radius:8px;border:1px solid #e6efe6;background:transparent;color:var(--text)}
+    input[type=text],input[type=email],select{padding:8px;border-radius:8px;border:1px solid #e6efe6;background:transparent;color:var(--text)}
 
     /* small screens */
     @media(max-width:850px){main{grid-template-columns:1fr} .logo{display:none}.search-in{min-width:100px}}
+    /* small tweak for dark borders */
+    .dark .card{box-shadow:none;border:1px solid rgba(255,255,255,0.03)}
+    .dark header{border-bottom:1px solid rgba(255,255,255,0.03)}
+    .read-btn{background:transparent;border:0;cursor:pointer;color:var(--accent);font-weight:700;padding:6px;border-radius:6px}
   </style>
 </head>
 <body>
   <div class="app">
     <header>
       <div class="brand">
-        <div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABQ0lEQVR4nO3YwQnCMBRF0a78xQbS2hG8iJxEJ3o7sR1o0XQGgY5y2sE1r1j/2vY3nZ3s7u7t7gGxIYbVq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq9Vq/At8BD1g6Yz2tmgAAAABJRU5ErkJggg==" alt="logo"/></div>
+        <!-- logo: usa la imagen que subiste -->
+        <div class="logo" title="Logo Foro de Pabos">
+          <img id="siteLogo" src="/mnt/data/A_digital_vector_emblem_features_a_turkey_dressed_.png" alt="logo pavo" />
+        </div>
         <div>
-          <h1>PABOSCONNECT</h1>
+          <h1 id="siteTitle">PABOSCONNECT</h1>
           <p class="lead">Foro académico — Interacción Humano-Computadora (UACJ)</p>
         </div>
       </div>
@@ -71,10 +88,11 @@
       <div class="top-actions">
         <div class="search card" style="display:flex;align-items:center">
           <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#6b7280" d="M9.5 3a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM20.7 20.3 16 15.6"/></svg>
-          <input id="searchBox" class="search-in" placeholder="Buscar temas, materias, autores...">
+          <input id="searchBox" class="search-in" placeholder="Buscar temas, materias, autores..." />
         </div>
         <button class="btn" id="newThreadBtn">+ Nuevo tema</button>
         <button class="btn ghost" id="loginBtn">Iniciar sesión</button>
+        <button class="btn ghost" id="themeToggle" title="Cambiar tema">🌙</button>
       </div>
     </header>
 
@@ -210,6 +228,15 @@
     // Estado de sesión simple
     let sessionUser = null;
 
+    // tema y preferencias
+    const THEME_KEY = 'pabos_theme'; // 'light'|'dark'
+    // inicia en claro (según pediste). si hay preferencia en localStorage la respeta.
+    function initTheme(){
+      const saved = localStorage.getItem(THEME_KEY);
+      if(saved === 'dark'){ document.documentElement.classList.add('dark'); byId('themeToggle').textContent = '☀️'; }
+      else { document.documentElement.classList.remove('dark'); byId('themeToggle').textContent = '🌙'; }
+    }
+
     // util
     const byId = id=>document.getElementById(id);
 
@@ -217,7 +244,11 @@
     function renderTop(){
       const ul = byId('topList'); ul.innerHTML = '';
       const users = [...db.users].sort((a,b)=>b.reputation-a.reputation).slice(0,5);
-      users.forEach(u=>{const li=document.createElement('li'); li.textContent = ${u.name} — ${u.reputation} pts; ul.appendChild(li)});
+      users.forEach(u=>{
+        const li=document.createElement('li');
+        li.textContent = `${u.name} — ${u.reputation} pts`;
+        ul.appendChild(li);
+      });
     }
 
     // render threads
@@ -226,13 +257,14 @@
       let threads = db.threads.slice();
       const sort = byId('sortSelect').value;
       if(filter!=='all') threads = threads.filter(t=>t.category===filter);
-      if(q) threads = threads.filter(t=> (t.title+t.body).toLowerCase().includes(q.toLowerCase()));
+      if(q) threads = threads.filter(t=> (t.title + ' ' + t.body).toLowerCase().includes(q.toLowerCase()));
       if(sort==='new') threads.sort((a,b)=>b.created-a.created);
-      if(sort==='top') threads.sort((a,b)=>b.votes-b.votes?b.votes-a.votes: b.created-a.created);
-      if(sort==='answered') threads.sort((a,b)=> (b.replies.length - a.replies.length) || (b.created-a.created));
+      if(sort==='top') threads.sort((a,b)=> (b.votes - a.votes) || (b.created - a.created));
+      if(sort==='answered') threads.sort((a,b)=> (b.replies.length - a.replies.length) || (b.created - a.created));
 
       threads.forEach(t=>{
         const el = document.createElement('div'); el.className='thread';
+        const preview = escapeHtml(t.body.slice(0,220)) + (t.body.length>220 ? '...' : '');
         el.innerHTML = `
           <div class="votes">
             <button class="up" data-id="${t.id}">▲</button>
@@ -246,9 +278,10 @@
               </div>
               <div class="tags"><div class="tag">${t.category}</div></div>
             </div>
-            <div style="margin-top:8px;color:var(--muted);font-size:14px">${escapeHtml(t.body.slice(0,220))}${t.body.length>220? '...':''}</div>
-            <div style="margin-top:10px;display:flex;gap:8px">
+            <div style="margin-top:8px;color:var(--muted);font-size:14px">${preview}</div>
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
               <button class="btn ghost viewBtn" data-id="${t.id}">Ver tema</button>
+              <button class="read-btn" data-id="${t.id}" data-type="preview">🔊 Leer</button>
             </div>
           </div>
         `;
@@ -256,8 +289,15 @@
       });
 
       // attach events
-      document.querySelectorAll('.up').forEach(b=>b.onclick = e=>{voteThread(e.target.dataset.id,1)});
-      document.querySelectorAll('.viewBtn').forEach(b=>b.onclick = e=>openThread(e.target.dataset.id));
+      document.querySelectorAll('.up').forEach(b=>b.onclick = e=>{voteThread(e.currentTarget.dataset.id,1)});
+      document.querySelectorAll('.viewBtn').forEach(b=>b.onclick = e=>openThread(e.currentTarget.dataset.id));
+      document.querySelectorAll('.read-btn').forEach(b=>b.onclick = e=>{
+        const id = e.currentTarget.dataset.id;
+        const type = e.currentTarget.dataset.type;
+        const t = db.threads.find(x=>x.id===id);
+        if(!t) return;
+        if(type==='preview') speak(`${t.title}. ${t.body}`);
+      });
     }
 
     function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -266,12 +306,17 @@
 
     function voteThread(id,delta){ const t = db.threads.find(x=>x.id===id); if(!t) return; t.votes += delta; saveDB(); renderThreads('all', byId('searchBox').value); renderTop(); }
 
-    function openThread(id){ const t = db.threads.find(x=>x.id===id); if(!t) return; const modal = byId('modalView'); modal.style.display='flex'; const box = byId('viewModalContent'); box.innerHTML = '';
+    function openThread(id){
+      const t = db.threads.find(x=>x.id===id); if(!t) return;
+      const modal = byId('modalView'); modal.style.display='flex';
+      const box = byId('viewModalContent'); box.innerHTML = '';
       const author = getUserName(t.authorId);
+
       const html = document.createElement('div');
       html.innerHTML = `
         <h3>${escapeHtml(t.title)}</h3>
         <div style="color:var(--muted);font-size:13px">Por ${author} · ${timeAgo(t.created)} · ${t.votes} votos</div>
+        <div style="margin-top:8px"><button class="read-btn" id="readThreadFull">🔊 Leer tema completo</button></div>
         <hr style="margin:12px 0">
         <div style="white-space:pre-wrap">${escapeHtml(t.body)}</div>
         <hr style="margin:12px 0">
@@ -286,12 +331,20 @@
         </div>
       `;
       box.appendChild(html);
-      const repliesBox = box.querySelector('#repliesBox');
-      t.replies.forEach(r=>{ const u=getUserName(r.authorId); const d=document.createElement('div'); d.style.padding='8px'; d.style.borderRadius='8px'; d.style.border='1px solid #eef7ef'; d.style.marginTop='8px'; d.innerHTML = <div style="font-weight:700">${u} <small style="color:var(--muted);font-weight:400">· ${timeAgo(r.created)}</small></div><div style="margin-top:6px">${escapeHtml(r.body)}</div>; repliesBox.appendChild(d);});
 
-      box.querySelector('#closeView').onclick = ()=>{modal.style.display='none';}
+      const repliesBox = box.querySelector('#repliesBox');
+      t.replies.forEach(r=>{
+        const u = getUserName(r.authorId);
+        const d = document.createElement('div');
+        d.style.padding='8px'; d.style.borderRadius='8px'; d.style.border='1px solid #eef7ef'; d.style.marginTop='8px';
+        d.innerHTML = `<div style="font-weight:700">${escapeHtml(u)} <small style="color:var(--muted);font-weight:400">· ${timeAgo(r.created)}</small></div><div style="margin-top:6px">${escapeHtml(r.body)}</div><div style="margin-top:6px"><button class="read-btn reply-read" data-id="${r.id}">🔊 Leer respuesta</button></div>`;
+        repliesBox.appendChild(d);
+      });
+
+      // events inside modal
+      box.querySelector('#closeView').onclick = ()=>{ modal.style.display='none'; }
       box.querySelector('#publishReply').onclick = ()=>{
-        const text = box.querySelector('#replyText').value.trim(); if(!text){alert('Escribe algo para responder');return}
+        const text = box.querySelector('#replyText').value.trim(); if(!text){ alert('Escribe algo para responder'); return }
         const rid = 'r'+Math.random().toString(36).slice(2,9);
         const authorId = sessionUser?sessionUser.id:'guest';
         const reply = {id:rid,authorId,body:text,created:Date.now()};
@@ -300,6 +353,18 @@
         const u = db.users.find(x=>x.id===authorId); if(u) u.reputation += 2;
         saveDB(); renderTop(); openThread(id); // re-open to refresh
       }
+
+      // read full thread
+      box.querySelector('#readThreadFull').onclick = ()=> speak(`${t.title}. ${t.body}. Respuestas: ${t.replies.length}`);
+
+      // attach read buttons for replies
+      box.querySelectorAll('.reply-read').forEach(b=>{
+        b.onclick = e=>{
+          const rid = e.currentTarget.dataset.id;
+          const r = t.replies.find(x=>x.id===rid);
+          if(r) speak(`${getUserName(r.authorId)} dijo: ${r.body}`);
+        };
+      });
     }
 
     // persist
@@ -331,7 +396,7 @@
 
     function updateSessionUI(){ if(sessionUser){ byId('userName').textContent = sessionUser.name; byId('userSub').textContent = sessionUser.major || ''; byId('avatarLetter').textContent = sessionUser.name.slice(0,1); byId('loginBtn').style.display='none'; byId('logoutBtn').style.display='inline-block'; } else{ byId('userName').textContent='Invitado'; byId('userSub').textContent='Sin sesión'; byId('avatarLetter').textContent='G'; byId('loginBtn').style.display='inline-block'; byId('logoutBtn').style.display='none'; } }
 
-    // filters
+    // filtros
     document.querySelectorAll('.cat').forEach(c=>c.onclick = e=>{ const cat=e.currentTarget.dataset.cat; byId('currentFilter').textContent=cat; renderThreads(cat, byId('searchBox').value); });
     byId('sortSelect').onchange = ()=>renderThreads('all',byId('searchBox').value);
     byId('searchBox').oninput = ()=>renderThreads('all',byId('searchBox').value);
@@ -339,19 +404,44 @@
     // profile btn
     byId('myProfileBtn').onclick = ()=>{
       if(!sessionUser){ alert('Inicia sesión para ver tu perfil'); return }
-      const modal = byId('modalView'); modal.style.display='flex'; const box = byId('viewModalContent'); box.innerHTML = <h3>Perfil — ${escapeHtml(sessionUser.name)}</h3><div style="color:var(--muted)">${escapeHtml(sessionUser.major||'—')}</div><hr><div><strong>Reputación: </strong>${sessionUser.reputation} pts</div><div style="margin-top:8px"><strong>Tus temas publicados:</strong><ul>${db.threads.filter(t=>t.authorId===sessionUser.id).map(t=>'<li>'+escapeHtml(t.title)+'</li>').join('')}</ul></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" id="closeProf">Cerrar</button></div>;
+      const modal = byId('modalView'); modal.style.display='flex'; const box = byId('viewModalContent');
+      const userThreads = db.threads.filter(t=>t.authorId===sessionUser.id);
+      box.innerHTML = `<h3>Perfil — ${escapeHtml(sessionUser.name)}</h3><div style="color:var(--muted)">${escapeHtml(sessionUser.major||'—')}</div><hr><div><strong>Reputación: </strong>${sessionUser.reputation} pts</div><div style="margin-top:8px"><strong>Tus temas publicados:</strong><ul>${userThreads.map(t=>'<li>'+escapeHtml(t.title)+'</li>').join('')}</ul></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" id="closeProf">Cerrar</button></div>`;
       box.querySelector('#closeProf').onclick = ()=>{ modal.style.display='none'; }
     }
 
+    // theme toggle
+    byId('themeToggle').onclick = ()=>{
+      if(document.documentElement.classList.contains('dark')){
+        document.documentElement.classList.remove('dark');
+        byId('themeToggle').textContent = '🌙';
+        localStorage.setItem(THEME_KEY,'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        byId('themeToggle').textContent = '☀️';
+        localStorage.setItem(THEME_KEY,'dark');
+      }
+    };
+
     // inicial
+    initTheme();
     renderTop(); renderThreads('all',''); updateSessionUI();
 
     // cerrar modales al clickear fondo
     document.querySelectorAll('.modal-back').forEach(m=>m.onclick = e=>{ if(e.target===m) m.style.display='none'; });
 
+    // Text-to-speech helper
+    function speak(text){
+      if(!('speechSynthesis' in window)){ alert('Tu navegador no soporta SpeechSynthesis'); return; }
+      window.speechSynthesis.cancel(); // stop any current speech
+      const utter = new SpeechSynthesisUtterance(text);
+      // optionally: pick a voice that matches language
+      utter.lang = 'es-ES';
+      window.speechSynthesis.speak(utter);
+    }
+
     // small helpers
     // When user replies, we re-open; to avoid nested issues, override openThread to refresh
-
   </script>
 </body>
 </html>
